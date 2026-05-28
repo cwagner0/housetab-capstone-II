@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_28_194517) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_28_201640) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,57 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_194517) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "expenses", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "paid_by_user_id", null: false
+    t.string "description", null: false
+    t.decimal "total_amount", precision: 10, scale: 2, null: false
+    t.string "store_name"
+    t.date "date", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id", "date"], name: "index_expenses_on_household_id_and_date"
+    t.index ["household_id"], name: "index_expenses_on_household_id"
+    t.index ["paid_by_user_id"], name: "index_expenses_on_paid_by_user_id"
+  end
+
+  create_table "households", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "invite_code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invite_code"], name: "index_households_on_invite_code", unique: true
+  end
+
+  create_table "memberships", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "household_id", null: false
+    t.string "role", default: "member", null: false
+    t.string "nickname"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["household_id"], name: "index_memberships_on_household_id"
+    t.index ["user_id", "household_id"], name: "index_memberships_on_user_id_and_household_id", unique: true
+    t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "settlements", force: :cascade do |t|
+    t.bigint "household_id", null: false
+    t.bigint "from_user_id", null: false
+    t.bigint "to_user_id", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.string "note"
+    t.string "status", default: "pending", null: false
+    t.datetime "confirmed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["from_user_id"], name: "index_settlements_on_from_user_id"
+    t.index ["household_id", "status"], name: "index_settlements_on_household_id_and_status"
+    t.index ["household_id"], name: "index_settlements_on_household_id"
+    t.index ["to_user_id"], name: "index_settlements_on_to_user_id"
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|
@@ -184,6 +235,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_194517) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "splits", force: :cascade do |t|
+    t.bigint "expense_id", null: false
+    t.bigint "user_id", null: false
+    t.decimal "amount_owed", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["expense_id", "user_id"], name: "index_splits_on_expense_id_and_user_id", unique: true
+    t.index ["expense_id"], name: "index_splits_on_expense_id"
+    t.index ["user_id"], name: "index_splits_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "name", null: false
     t.string "email", default: "", null: false
@@ -199,10 +261,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_194517) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "expenses", "households"
+  add_foreign_key "expenses", "users", column: "paid_by_user_id"
+  add_foreign_key "memberships", "households"
+  add_foreign_key "memberships", "users"
+  add_foreign_key "settlements", "households"
+  add_foreign_key "settlements", "users", column: "from_user_id"
+  add_foreign_key "settlements", "users", column: "to_user_id"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "splits", "expenses"
+  add_foreign_key "splits", "users"
 end

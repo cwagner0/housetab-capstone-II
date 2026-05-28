@@ -1,27 +1,64 @@
-# == Schema Information
-#
-# Table name: users
-#
-#  id                     :bigint           not null, primary key
-#  email                  :string           default(""), not null
-#  encrypted_password     :string           default(""), not null
-#  name                   :string           not null
-#  remember_created_at    :datetime
-#  reset_password_sent_at :datetime
-#  reset_password_token   :string
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
-#
-# Indexes
-#
-#  index_users_on_email                 (email) UNIQUE
-#  index_users_on_reset_password_token  (reset_password_token) UNIQUE
-#
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  # Devise authentication
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # --- Associations ---
+  has_many :memberships, dependent: :destroy
+  has_many :households, through: :memberships
+
+  has_many :paid_expenses, class_name: "Expense", foreign_key: "paid_by_user_id", dependent: :destroy
+  has_many :splits, dependent: :destroy
+
+  has_many :sent_settlements, class_name: "Settlement", foreign_key: "from_user_id", dependent: :destroy
+  has_many :received_settlements, class_name: "Settlement", foreign_key: "to_user_id", dependent: :destroy
+
+  # --- Validations ---
   validates :name, presence: true
+
+  # --- Methods ---
+  # Net balance with another user in a specific household.
+  # Positive = they owe you. Negative = you owe them.
+  def net_balance_with(other_user, household)
+    they_owe_me = Split.joins(:expense)
+      .where(user: other_user)
+      .where(expenses: { paid_by_user_id: self.id, household_id: household.id })
+      .sum(:amount_owed)
+
+    i_owe_them = Split.joins(:expense)
+      .where(user: self)
+      .where(expenses: { paid_by_user_id: other_user.id, household_id: household.id })
+      .sum(:amount_owed)
+
+    they_settled = Settlement.where(
+      sender: other_user, recipient: self,
+      household: household, status: "confirmed"
+    ).sum(:amount)
+
+    i_settled = Settlement.where(
+      sender: self, recipient: other_user,
+      household: household, status: "confirmed"
+    ).sum(:amount)
+
+    (they_owe_me - they_settled) - (i_owe_them - i_settled)
+  end
+
+  def all_balances_in(household)
+    household.members.where.not(id: self.id).map do |other|
+      {
+        user: other,
+        amount: net_balance_with(other, household)
+      }
+    end
+  end
+
+  def total_owed_to_you(household)
+    all_balances_in(household)
+      .select { |b| b[:amount] > 0 }
+      .sum { |b| b[:amount] }
+  end
+
+  def initial
+    name.first.upcase
+  end
 end
