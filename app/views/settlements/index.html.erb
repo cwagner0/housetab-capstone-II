@@ -1,25 +1,40 @@
-<h1>Settlements in <%= @household.name %></h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="mb-0">Settlements in <%= @household.name %></h1>
+  <%= link_to "Log a settlement", new_household_settlement_path(@household), class: "btn btn-primary" %>
+</div>
 
-<p><%= link_to "Log a new settlement", new_household_settlement_path(@household) %></p>
+<div class="card">
+  <% if @settlements.any? %>
+    <ul class="list-group list-group-flush">
+      <% @settlements.each do |s| %>
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong><%= s.sender.name %></strong> paid <strong><%= s.recipient.name %></strong> $<%= s.amount %>
+              <% if s.note.present? %>
+                <br><small class="text-muted">"<%= s.note %>"</small>
+              <% end %>
+              <br><small class="text-muted"><%= s.created_at.strftime("%b %d, %Y") %></small>
+            </div>
+            <div class="text-end">
+              <% status_color = s.confirmed? ? "success" : (s.disputed? ? "danger" : "warning") %>
+              <span class="badge bg-<%= status_color %> mb-2"><%= s.status %></span>
+              <% if s.confirmable_by?(current_user) %>
+                <div>
+                  <%= button_to "Confirm", confirm_settlement_path(s), method: :post, class: "btn btn-sm btn-success", form: { style: "display: inline;" } %>
+                  <%= button_to "Dispute", dispute_settlement_path(s), method: :post, class: "btn btn-sm btn-outline-danger", form: { style: "display: inline;" } %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="card-body text-muted">No settlements yet.</div>
+  <% end %>
+</div>
 
-<% if @settlements.any? %>
-  <ul>
-    <% @settlements.each do |s| %>
-      <li>
-        <%= s.created_at.strftime("%b %d") %> &mdash;
-        <%= s.sender.name %> paid <%= s.recipient.name %> $<%= s.amount %>
-        <% if s.note.present? %>("<%= s.note %>")<% end %>
-        &mdash; <strong><%= s.status %></strong>
-
-        <% if s.confirmable_by?(current_user) %>
-          <%= button_to "Confirm", confirm_settlement_path(s), method: :post %>
-          <%= button_to "Dispute", dispute_settlement_path(s), method: :post %>
-        <% end %>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>No settlements yet.</p>
-<% end %>
-
-<p><%= link_to "Back to household", @household %></p>
+<div class="mt-3">
+  <%= link_to "Back to household", @household, class: "btn btn-link" %>
+</div>

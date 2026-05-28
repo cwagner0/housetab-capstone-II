@@ -1,63 +1,88 @@
-<h1>Balance with <%= @other_user.name %></h1>
+<h1 class="mb-1">Balance with <%= @other_user.name %></h1>
 
-<p>
-  <% if @net_balance > 0 %>
-    <strong><%= @other_user.name %> owes you $<%= @net_balance.round(2) %></strong>
-  <% elsif @net_balance < 0 %>
-    <strong>You owe <%= @other_user.name %> $<%= @net_balance.abs.round(2) %></strong>
+<div class="card mb-4">
+  <div class="card-body">
+    <p class="h4 mb-3">
+      <% if @net_balance > 0 %>
+        <span class="badge bg-success">+ $<%= @net_balance.round(2) %></span>
+        <%= @other_user.name %> owes you
+      <% elsif @net_balance < 0 %>
+        <span class="badge bg-danger">- $<%= @net_balance.abs.round(2) %></span>
+        You owe <%= @other_user.name %>
+      <% else %>
+        <span class="badge bg-secondary">settled up</span>
+      <% end %>
+    </p>
+    <%= link_to "Settle up", new_household_settlement_path(@household, to_user_id: @other_user.id), class: "btn btn-primary" %>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><strong>Expenses you paid where <%= @other_user.name %> owes</strong></div>
+      <% if @expenses_i_paid.any? %>
+        <ul class="list-group list-group-flush">
+          <% @expenses_i_paid.each do |e| %>
+            <% split = e.splits.find_by(user_id: @other_user.id) %>
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                <%= link_to e.description, [@household, e], class: "text-decoration-none" %><br>
+                <small class="text-muted"><%= e.date.strftime("%b %d") %></small>
+              </div>
+              <span class="fw-bold text-success">+$<%= split&.amount_owed %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="card-body text-muted">None.</div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header"><strong>Expenses <%= @other_user.name %> paid where you owe</strong></div>
+      <% if @expenses_they_paid.any? %>
+        <ul class="list-group list-group-flush">
+          <% @expenses_they_paid.each do |e| %>
+            <% split = e.splits.find_by(user_id: current_user.id) %>
+            <li class="list-group-item d-flex justify-content-between">
+              <div>
+                <%= link_to e.description, [@household, e], class: "text-decoration-none" %><br>
+                <small class="text-muted"><%= e.date.strftime("%b %d") %></small>
+              </div>
+              <span class="fw-bold text-danger">-$<%= split&.amount_owed %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="card-body text-muted">None.</div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header"><strong>Settlements between you</strong></div>
+  <% if @settlements.any? %>
+    <ul class="list-group list-group-flush">
+      <% @settlements.each do |s| %>
+        <li class="list-group-item d-flex justify-content-between">
+          <div>
+            <%= s.sender.name %> &rarr; <%= s.recipient.name %>: $<%= s.amount %><br>
+            <small class="text-muted"><%= s.created_at.strftime("%b %d, %Y") %></small>
+          </div>
+          <% status_color = s.confirmed? ? "success" : (s.disputed? ? "danger" : "warning") %>
+          <span class="badge bg-<%= status_color %>"><%= s.status %></span>
+        </li>
+      <% end %>
+    </ul>
   <% else %>
-    <strong>Settled up</strong>
+    <div class="card-body text-muted">None.</div>
   <% end %>
-</p>
+</div>
 
-<p><%= link_to "Settle up", new_household_settlement_path(@household, to_user_id: @other_user.id) %></p>
-
-<h2>Expenses you paid where <%= @other_user.name %> owes</h2>
-<% if @expenses_i_paid.any? %>
-  <ul>
-    <% @expenses_i_paid.each do |e| %>
-      <% split = e.splits.find_by(user_id: @other_user.id) %>
-      <li>
-        <%= e.date.strftime("%b %d") %> &mdash;
-        <%= link_to e.description, [@household, e] %> &mdash;
-        <%= @other_user.name %> owes $<%= split&.amount_owed %>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>None.</p>
-<% end %>
-
-<h2>Expenses <%= @other_user.name %> paid where you owe</h2>
-<% if @expenses_they_paid.any? %>
-  <ul>
-    <% @expenses_they_paid.each do |e| %>
-      <% split = e.splits.find_by(user_id: current_user.id) %>
-      <li>
-        <%= e.date.strftime("%b %d") %> &mdash;
-        <%= link_to e.description, [@household, e] %> &mdash;
-        You owe $<%= split&.amount_owed %>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>None.</p>
-<% end %>
-
-<h2>Settlements between you</h2>
-<% if @settlements.any? %>
-  <ul>
-    <% @settlements.each do |s| %>
-      <li>
-        <%= s.created_at.strftime("%b %d") %> &mdash;
-        <%= s.sender.name %> &rarr; <%= s.recipient.name %>:
-        $<%= s.amount %>
-        (<strong><%= s.status %></strong>)
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>None.</p>
-<% end %>
-
-<p><%= link_to "Back to dashboard", root_path %></p>
+<div class="mt-4">
+  <%= link_to "Back to dashboard", root_path, class: "btn btn-link" %>
+</div>

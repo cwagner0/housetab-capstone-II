@@ -1,19 +1,28 @@
-<h1>Expenses in <%= @household.name %></h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="mb-0">Expenses in <%= @household.name %></h1>
+  <%= link_to "Add new expense", new_household_expense_path(@household), class: "btn btn-primary" %>
+</div>
 
-<p><%= link_to "Add new expense", new_household_expense_path(@household) %></p>
+<div class="card">
+  <% if @expenses.any? %>
+    <ul class="list-group list-group-flush">
+      <% @expenses.each do |expense| %>
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <div>
+              <%= link_to expense.description, [@household, expense], class: "fw-semibold text-decoration-none" %><br>
+              <small class="text-muted"><%= expense.date.strftime("%b %d") %> &middot; paid by <%= expense.payer.name %></small>
+            </div>
+            <div class="fw-bold">$<%= expense.total_amount %></div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="card-body text-muted">No expenses yet.</div>
+  <% end %>
+</div>
 
-<% if @expenses.any? %>
-  <ul>
-    <% @expenses.each do |expense| %>
-      <li>
-        <%= expense.date.strftime("%b %d") %> &mdash;
-        <%= link_to expense.description, [@household, expense] %>
-        ($<%= expense.total_amount %>, paid by <%= expense.payer.name %>)
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>No expenses yet.</p>
-<% end %>
-
-<p><%= link_to "Back to household", @household %></p>
+<div class="mt-3">
+  <%= link_to "Back to household", @household, class: "btn btn-link" %>
+</div>

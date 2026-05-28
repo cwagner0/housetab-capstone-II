@@ -1,30 +1,47 @@
-<h1><%= @expense.description %></h1>
-
-<p><strong>Paid by:</strong> <%= @expense.payer.name %></p>
-<p><strong>Total:</strong> $<%= @expense.total_amount %></p>
-<p><strong>Date:</strong> <%= @expense.date.strftime("%B %d, %Y") %></p>
-
-<% if @expense.store_name.present? %>
-  <p><strong>Store:</strong> <%= @expense.store_name %></p>
-<% end %>
-
-<% if @expense.notes.present? %>
-  <p><strong>Notes:</strong> <%= @expense.notes %></p>
-<% end %>
-
-<% if @expense.receipt_photo.attached? %>
-  <h3>Receipt</h3>
-  <%= image_tag @expense.receipt_photo, style: "max-width: 400px;" %>
-<% end %>
-
-<h2>Who owes what</h2>
-<ul>
-  <% @expense.splits.includes(:user).each do |split| %>
-    <li><%= split.user.name %> owes $<%= split.amount_owed %></li>
-  <% end %>
-</ul>
-
-<p>
-  <%= link_to "All expenses", household_expenses_path(@expense.household) %> |
-  <%= link_to "Back to household", @expense.household %>
+<h1 class="mb-1"><%= @expense.description %></h1>
+<p class="text-muted mb-4">
+  <%= @expense.date.strftime("%B %d, %Y") %>
+  <% if @expense.store_name.present? %> &middot; <%= @expense.store_name %><% end %>
 </p>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <p class="mb-2"><strong>Paid by:</strong> <%= @expense.payer.name %></p>
+        <p class="mb-2"><strong>Total:</strong> $<%= @expense.total_amount %></p>
+        <% if @expense.notes.present? %>
+          <p class="mb-0"><strong>Notes:</strong> <%= @expense.notes %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header"><strong>Who owes what</strong></div>
+      <ul class="list-group list-group-flush">
+        <% @expense.splits.includes(:user).each do |split| %>
+          <li class="list-group-item d-flex justify-content-between">
+            <%= split.user.name %>
+            <span class="fw-bold">$<%= split.amount_owed %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <% if @expense.receipt_photo.attached? %>
+      <div class="card">
+        <div class="card-header"><strong>Receipt</strong></div>
+        <div class="card-body text-center">
+          <%= image_tag @expense.receipt_photo, class: "img-fluid rounded" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-4">
+  <%= link_to "All expenses", household_expenses_path(@expense.household), class: "btn btn-outline-secondary" %>
+  <%= link_to "Back to household", @expense.household, class: "btn btn-link" %>
+</div>

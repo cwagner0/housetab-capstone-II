@@ -1,58 +1,61 @@
-<h1>New expense in <%= @household.name %></h1>
+<h1 class="mb-4">New expense in <%= @household.name %></h1>
 
-<%= form_with model: [@household, @expense], multipart: true do |f| %>
-  <% if @expense.errors.any? %>
-    <div style="color: red;">
-      <ul>
-        <% @expense.errors.full_messages.each do |msg| %>
-          <li><%= msg %></li>
+<div class="card">
+  <div class="card-body">
+    <%= form_with model: [@household, @expense], multipart: true do |f| %>
+      <% if @expense.errors.any? %>
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            <% @expense.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="mb-3">
+        <%= f.label :description, class: "form-label" %>
+        <%= f.text_field :description, class: "form-control" %>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <%= f.label :total_amount, "Total amount ($)", class: "form-label" %>
+          <%= f.number_field :total_amount, step: 0.01, class: "form-control" %>
+        </div>
+        <div class="col-md-6 mb-3">
+          <%= f.label :date, class: "form-label" %>
+          <%= f.date_field :date, class: "form-control" %>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :store_name, "Store name (optional)", class: "form-label" %>
+        <%= f.text_field :store_name, class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :receipt_photo, "Receipt photo (optional)", class: "form-label" %>
+        <%= f.file_field :receipt_photo, accept: "image/*", class: "form-control" %>
+      </div>
+
+      <div class="mb-3">
+        <%= f.label :notes, "Notes (optional)", class: "form-label" %>
+        <%= f.text_area :notes, rows: 2, class: "form-control" %>
+      </div>
+
+      <fieldset class="mb-3">
+        <legend class="form-label">Split evenly with (you pay your own share):</legend>
+        <% @members.each do |member| %>
+          <div class="form-check">
+            <%= check_box_tag "expense[debtor_ids][]", member.id, false, class: "form-check-input", id: "debtor_#{member.id}" %>
+            <%= label_tag "debtor_#{member.id}", member.name, class: "form-check-label" %>
+          </div>
         <% end %>
-      </ul>
-    </div>
-  <% end %>
+      </fieldset>
 
-  <div>
-    <%= f.label :description %><br>
-    <%= f.text_field :description %>
-  </div>
-
-  <div>
-    <%= f.label :total_amount, "Total amount ($)" %><br>
-    <%= f.number_field :total_amount, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= f.label :store_name, "Store name (optional)" %><br>
-    <%= f.text_field :store_name %>
-  </div>
-
-  <div>
-    <%= f.label :date %><br>
-    <%= f.date_field :date %>
-  </div>
-
-  <div>
-    <%= f.label :receipt_photo, "Receipt photo (optional)" %><br>
-    <%= f.file_field :receipt_photo, accept: "image/*" %>
-  </div>
-
-  <div>
-    <%= f.label :notes, "Notes (optional)" %><br>
-    <%= f.text_area :notes, rows: 2 %>
-  </div>
-
-  <fieldset>
-    <legend>Split evenly with (you're the payer, you cover your own share):</legend>
-    <% @members.each do |member| %>
-      <label>
-        <%= check_box_tag "expense[debtor_ids][]", member.id %>
-        <%= member.name %>
-      </label><br>
+      <%= f.submit "Save expense", class: "btn btn-primary" %>
+      <%= link_to "Cancel", @household, class: "btn btn-link" %>
     <% end %>
-  </fieldset>
-
-  <br>
-  <%= f.submit "Save expense" %>
-<% end %>
-
-<p><%= link_to "Back to household", @household %></p>
+  </div>
+</div>

@@ -1,56 +1,79 @@
-<h1>Hi, <%= current_user.name %></h1>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="mb-0">Hi, <%= current_user.name %></h1>
+</div>
 
 <% if @current_household.nil? %>
-  <p>You're not in a household yet.</p>
-  <p>
-    <%= link_to "Create a household", new_household_path %>
-    or
-    <%= link_to "Join with an invite code", join_household_path %>
-  </p>
+  <div class="card">
+    <div class="card-body text-center py-5">
+      <h2 class="mb-3">You're not in a household yet</h2>
+      <p class="text-muted">Create one to start tracking expenses with your roommates.</p>
+      <%= link_to "Create a household", new_household_path, class: "btn btn-primary me-2" %>
+      <%= link_to "Join with invite code", join_household_path, class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
 <% else %>
-  <h2><%= @current_household.name %></h2>
-  <p>Invite code: <code><%= @current_household.invite_code %></code></p>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h2 class="card-title mb-1"><%= @current_household.name %></h2>
+          <p class="text-muted mb-0">Invite code: <code><%= @current_household.invite_code %></code></p>
+        </div>
+        <div>
+          <%= link_to "View household", @current_household, class: "btn btn-outline-secondary btn-sm" %>
+          <%= link_to "Settlements", household_settlements_path(@current_household), class: "btn btn-outline-secondary btn-sm" %>
+          <%= link_to "Add expense", new_household_expense_path(@current_household), class: "btn btn-primary btn-sm" %>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <h3>Your balances</h3>
-  <% if @balances.any? %>
-    <ul>
-      <% @balances.each do |b| %>
-        <li>
-          <strong><%= link_to b[:user].name, household_balance_path(@current_household, user_id: b[:user].id) %>:</strong>
-          <% if b[:amount] > 0 %>
-            owes you $<%= b[:amount].round(2) %>
-          <% elsif b[:amount] < 0 %>
-            you owe $<%= b[:amount].abs.round(2) %>
-          <% else %>
-            settled up
-          <% end %>
-        </li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p>No other members yet.</p>
-  <% end %>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><strong>Your balances</strong></div>
+        <% if @balances.any? %>
+          <ul class="list-group list-group-flush">
+            <% @balances.each do |b| %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <%= link_to b[:user].name, household_balance_path(@current_household, user_id: b[:user].id), class: "text-decoration-none" %>
+                <% if b[:amount] > 0 %>
+                  <span class="badge bg-success">+ $<%= b[:amount].round(2) %></span>
+                <% elsif b[:amount] < 0 %>
+                  <span class="badge bg-danger">- $<%= b[:amount].abs.round(2) %></span>
+                <% else %>
+                  <span class="badge bg-secondary">settled</span>
+                <% end %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="card-body text-muted">No other members yet.</div>
+        <% end %>
+      </div>
+    </div>
 
-  <h3>Recent expenses</h3>
-  <% if @recent_expenses.any? %>
-    <ul>
-      <% @recent_expenses.each do |e| %>
-        <li>
-          <%= e.date.strftime("%b %d") %> &mdash;
-          <%= e.payer.name %> paid $<%= e.total_amount %> for <%= e.description %>
-        </li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p>No expenses yet.</p>
-  <% end %>
-
-  <p>
-    <%= link_to "View household", @current_household %> |
-    <%= link_to "Add expense", new_household_expense_path(@current_household) %> |
-    <%= link_to "Settlements", household_settlements_path(@current_household) %>
-  </p>  
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><strong>Recent expenses</strong></div>
+        <% if @recent_expenses.any? %>
+          <ul class="list-group list-group-flush">
+            <% @recent_expenses.each do |e| %>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong><%= e.description %></strong><br>
+                    <small class="text-muted"><%= e.date.strftime("%b %d") %> &middot; paid by <%= e.payer.name %></small>
+                  </div>
+                  <div class="fw-bold">$<%= e.total_amount %></div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="card-body text-muted">No expenses yet.</div>
+        <% end %>
+      </div>
+    </div>
+  </div>
 <% end %>
-
-<hr>
-<p><%= button_to "Sign out", destroy_user_session_path, method: :delete %></p>
