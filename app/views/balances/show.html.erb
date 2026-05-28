@@ -1,0 +1,63 @@
+<h1>Balance with <%= @other_user.name %></h1>
+
+<p>
+  <% if @net_balance > 0 %>
+    <strong><%= @other_user.name %> owes you $<%= @net_balance.round(2) %></strong>
+  <% elsif @net_balance < 0 %>
+    <strong>You owe <%= @other_user.name %> $<%= @net_balance.abs.round(2) %></strong>
+  <% else %>
+    <strong>Settled up</strong>
+  <% end %>
+</p>
+
+<p><%= link_to "Settle up", new_household_settlement_path(@household, to_user_id: @other_user.id) %></p>
+
+<h2>Expenses you paid where <%= @other_user.name %> owes</h2>
+<% if @expenses_i_paid.any? %>
+  <ul>
+    <% @expenses_i_paid.each do |e| %>
+      <% split = e.splits.find_by(user_id: @other_user.id) %>
+      <li>
+        <%= e.date.strftime("%b %d") %> &mdash;
+        <%= link_to e.description, [@household, e] %> &mdash;
+        <%= @other_user.name %> owes $<%= split&.amount_owed %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>None.</p>
+<% end %>
+
+<h2>Expenses <%= @other_user.name %> paid where you owe</h2>
+<% if @expenses_they_paid.any? %>
+  <ul>
+    <% @expenses_they_paid.each do |e| %>
+      <% split = e.splits.find_by(user_id: current_user.id) %>
+      <li>
+        <%= e.date.strftime("%b %d") %> &mdash;
+        <%= link_to e.description, [@household, e] %> &mdash;
+        You owe $<%= split&.amount_owed %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>None.</p>
+<% end %>
+
+<h2>Settlements between you</h2>
+<% if @settlements.any? %>
+  <ul>
+    <% @settlements.each do |s| %>
+      <li>
+        <%= s.created_at.strftime("%b %d") %> &mdash;
+        <%= s.sender.name %> &rarr; <%= s.recipient.name %>:
+        $<%= s.amount %>
+        (<strong><%= s.status %></strong>)
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>None.</p>
+<% end %>
+
+<p><%= link_to "Back to dashboard", root_path %></p>

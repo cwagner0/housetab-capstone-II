@@ -16,7 +16,7 @@
     <ul>
       <% @balances.each do |b| %>
         <li>
-          <strong><%= b[:user].name %>:</strong>
+          <strong><%= link_to b[:user].name, household_balance_path(@current_household, user_id: b[:user].id) %>:</strong>
           <% if b[:amount] > 0 %>
             owes you $<%= b[:amount].round(2) %>
           <% elsif b[:amount] < 0 %>
@@ -47,8 +47,9 @@
 
   <p>
     <%= link_to "View household", @current_household %> |
-    <%= link_to "Add expense", new_household_expense_path(@current_household) %>
-  </p>
+    <%= link_to "Add expense", new_household_expense_path(@current_household) %> |
+    <%= link_to "Settlements", household_settlements_path(@current_household) %>
+  </p>  
 <% end %>
 
 <hr>

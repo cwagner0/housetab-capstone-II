@@ -1,0 +1,35 @@
+<h1>Log a settlement in <%= @household.name %></h1>
+
+<p>Use this when you've paid a roommate back (Venmo, cash, whatever). They'll need to confirm.</p>
+
+<%= form_with model: [@household, @settlement] do |f| %>
+  <% if @settlement.errors.any? %>
+    <div style="color: red;">
+      <ul>
+        <% @settlement.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :to_user_id, "I paid:" %><br>
+    <%= f.select :to_user_id, @recipients.map { |u| [u.name, u.id] }, { prompt: "Pick a roommate" } %>
+  </div>
+
+  <div>
+    <%= f.label :amount, "Amount ($)" %><br>
+    <%= f.number_field :amount, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :note, "Note (optional)" %><br>
+    <%= f.text_field :note, placeholder: "e.g., Venmo'd for groceries" %>
+  </div>
+
+  <br>
+  <%= f.submit "Log settlement" %>
+<% end %>
+
+<p><%= link_to "Cancel", household_settlements_path(@household) %></p>

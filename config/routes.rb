@@ -10,5 +10,15 @@ Rails.application.routes.draw do
 
   resources :households, only: [:new, :create, :show] do
     resources :expenses, only: [:index, :new, :create, :show]
+    resources :settlements, only: [:index, :new, :create]
+    resources :balances, only: [:show], param: :user_id
+  end
+
+  # Member actions on a specific settlement (confirm/dispute)
+  resources :settlements, only: [] do
+    member do
+      post :confirm
+      post :dispute
+    end
   end
 end

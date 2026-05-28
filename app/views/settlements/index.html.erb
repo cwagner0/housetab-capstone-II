@@ -1,0 +1,25 @@
+<h1>Settlements in <%= @household.name %></h1>
+
+<p><%= link_to "Log a new settlement", new_household_settlement_path(@household) %></p>
+
+<% if @settlements.any? %>
+  <ul>
+    <% @settlements.each do |s| %>
+      <li>
+        <%= s.created_at.strftime("%b %d") %> &mdash;
+        <%= s.sender.name %> paid <%= s.recipient.name %> $<%= s.amount %>
+        <% if s.note.present? %>("<%= s.note %>")<% end %>
+        &mdash; <strong><%= s.status %></strong>
+
+        <% if s.confirmable_by?(current_user) %>
+          <%= button_to "Confirm", confirm_settlement_path(s), method: :post %>
+          <%= button_to "Dispute", dispute_settlement_path(s), method: :post %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No settlements yet.</p>
+<% end %>
+
+<p><%= link_to "Back to household", @household %></p>
