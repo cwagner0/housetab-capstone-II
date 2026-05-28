@@ -9,6 +9,8 @@ Rails.application.configure do
   # Auto-connect to database when rails console opens
   console do
     ActiveRecord::Base.connection
+
+  config.action_mailer.default_url_options = { host: 'localhost', port: 3000 } 
   end
 
   # Settings specified here will take precedence over those in config/application.rb.

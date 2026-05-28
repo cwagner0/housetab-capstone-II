@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
 gem "rails", "~> 8.0.2"               # The web framework
+gem "devise"
 gem "propshaft"                       # Asset pipeline (CSS, JS, images)
 gem "pg", "~> 1.1"                    # PostgreSQL database adapter
 gem "puma", ">= 5.0"                  # Web server
