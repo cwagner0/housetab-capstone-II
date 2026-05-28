@@ -1,0 +1,11 @@
+<h1>Join a household</h1>
+
+<%= form_with url: join_household_path, method: :post do |f| %>
+  <div>
+    <%= f.label :invite_code, "Invite code" %><br>
+    <%= f.text_field :invite_code, placeholder: "e.g., APT4-X7K2" %>
+  </div>
+  <%= f.submit "Join" %>
+<% end %>
+
+<p><%= link_to "Back to dashboard", root_path %></p>

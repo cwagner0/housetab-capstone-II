@@ -1,0 +1,22 @@
+<h1>Create a household</h1>
+
+<%= form_with model: @household do |f| %>
+  <% if @household.errors.any? %>
+    <div style="color: red;">
+      <ul>
+        <% @household.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+
+  <%= f.submit "Create" %>
+<% end %>
+
+<p><%= link_to "Back to dashboard", root_path %></p>

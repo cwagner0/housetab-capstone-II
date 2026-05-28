@@ -1,0 +1,55 @@
+<h1>Hi, <%= current_user.name %></h1>
+
+<% if @current_household.nil? %>
+  <p>You're not in a household yet.</p>
+  <p>
+    <%= link_to "Create a household", new_household_path %>
+    or
+    <%= link_to "Join with an invite code", join_household_path %>
+  </p>
+<% else %>
+  <h2><%= @current_household.name %></h2>
+  <p>Invite code: <code><%= @current_household.invite_code %></code></p>
+
+  <h3>Your balances</h3>
+  <% if @balances.any? %>
+    <ul>
+      <% @balances.each do |b| %>
+        <li>
+          <strong><%= b[:user].name %>:</strong>
+          <% if b[:amount] > 0 %>
+            owes you $<%= b[:amount].round(2) %>
+          <% elsif b[:amount] < 0 %>
+            you owe $<%= b[:amount].abs.round(2) %>
+          <% else %>
+            settled up
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No other members yet.</p>
+  <% end %>
+
+  <h3>Recent expenses</h3>
+  <% if @recent_expenses.any? %>
+    <ul>
+      <% @recent_expenses.each do |e| %>
+        <li>
+          <%= e.date.strftime("%b %d") %> &mdash;
+          <%= e.payer.name %> paid $<%= e.total_amount %> for <%= e.description %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No expenses yet.</p>
+  <% end %>
+
+  <p>
+    <%= link_to "View household", @current_household %> |
+    <%= link_to "Add expense", new_household_expense_path(@current_household) %>
+  </p>
+<% end %>
+
+<hr>
+<p><%= button_to "Sign out", destroy_user_session_path, method: :delete %></p>

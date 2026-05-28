@@ -1,0 +1,30 @@
+<h1><%= @expense.description %></h1>
+
+<p><strong>Paid by:</strong> <%= @expense.payer.name %></p>
+<p><strong>Total:</strong> $<%= @expense.total_amount %></p>
+<p><strong>Date:</strong> <%= @expense.date.strftime("%B %d, %Y") %></p>
+
+<% if @expense.store_name.present? %>
+  <p><strong>Store:</strong> <%= @expense.store_name %></p>
+<% end %>
+
+<% if @expense.notes.present? %>
+  <p><strong>Notes:</strong> <%= @expense.notes %></p>
+<% end %>
+
+<% if @expense.receipt_photo.attached? %>
+  <h3>Receipt</h3>
+  <%= image_tag @expense.receipt_photo, style: "max-width: 400px;" %>
+<% end %>
+
+<h2>Who owes what</h2>
+<ul>
+  <% @expense.splits.includes(:user).each do |split| %>
+    <li><%= split.user.name %> owes $<%= split.amount_owed %></li>
+  <% end %>
+</ul>
+
+<p>
+  <%= link_to "All expenses", household_expenses_path(@expense.household) %> |
+  <%= link_to "Back to household", @expense.household %>
+</p>

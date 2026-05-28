@@ -1,0 +1,19 @@
+<h1>Expenses in <%= @household.name %></h1>
+
+<p><%= link_to "Add new expense", new_household_expense_path(@household) %></p>
+
+<% if @expenses.any? %>
+  <ul>
+    <% @expenses.each do |expense| %>
+      <li>
+        <%= expense.date.strftime("%b %d") %> &mdash;
+        <%= link_to expense.description, [@household, expense] %>
+        ($<%= expense.total_amount %>, paid by <%= expense.payer.name %>)
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No expenses yet.</p>
+<% end %>
+
+<p><%= link_to "Back to household", @household %></p>

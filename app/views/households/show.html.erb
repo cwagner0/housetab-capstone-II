@@ -1,0 +1,34 @@
+<h1><%= @household.name %></h1>
+<p>Invite code: <code><%= @household.invite_code %></code></p>
+
+<h2>Members</h2>
+<ul>
+  <% @memberships.each do |m| %>
+    <li>
+      <%= m.display_name %>
+      <% if m.admin? %>(admin)<% end %>
+    </li>
+  <% end %>
+</ul>
+
+
+<p>
+  <%= link_to "Add new expense", new_household_expense_path(@household) %> |
+  <%= link_to "View all expenses", household_expenses_path(@household) %>
+</p>
+
+<h2>Recent expenses</h2>
+<% if @recent_expenses.any? %>
+  <ul>
+    <% @recent_expenses.each do |e| %>
+      <li>
+        <%= e.date.strftime("%b %d") %> &mdash;
+        <%= e.payer.name %> paid $<%= e.total_amount %> for <%= e.description %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No expenses yet.</p>
+<% end %>
+
+<p><%= link_to "Back to dashboard", root_path %></p>
