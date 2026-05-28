@@ -1,13 +1,14 @@
 class ExpensesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_household
-  before_action :ensure_member
 
   def index
+    authorize! @household, to: :show?
     @expenses = @household.expenses.recent.includes(:payer, :splits, :debtors)
   end
 
   def new
+    authorize! @household, to: :show?
     @expense = @household.expenses.new(date: Date.current)
     @members = @household.members.where.not(id: current_user.id)
   end
@@ -15,6 +16,7 @@ class ExpensesController < ApplicationController
   def create
     @expense = @household.expenses.new(expense_params)
     @expense.payer = current_user
+    authorize! @expense
 
     debtor_ids = Array(params[:expense][:debtor_ids]).reject(&:blank?).map(&:to_i)
 
@@ -25,7 +27,6 @@ class ExpensesController < ApplicationController
       return
     end
 
-    # Even split: floor to avoid going over total (payer eats remainder)
     per_person = (@expense.total_amount.to_d / (debtor_ids.size + 1)).floor(2)
 
     begin
@@ -44,18 +45,13 @@ class ExpensesController < ApplicationController
 
   def show
     @expense = @household.expenses.find(params[:id])
+    authorize! @expense
   end
 
   private
 
   def set_household
     @household = Household.find(params[:household_id])
-  end
-
-  def ensure_member
-    unless @household.members.include?(current_user)
-      redirect_to root_path, alert: "You're not a member of that household."
-    end
   end
 
   def expense_params

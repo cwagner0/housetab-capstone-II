@@ -1,9 +1,9 @@
 class BalancesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_household
-  before_action :ensure_member
 
   def show
+    authorize! @household, to: :show?
     @other_user = @household.members.find(params[:user_id])
     @net_balance = current_user.net_balance_with(@other_user, @household)
 
@@ -29,11 +29,5 @@ class BalancesController < ApplicationController
 
   def set_household
     @household = Household.find(params[:household_id])
-  end
-
-  def ensure_member
-    unless @household.members.include?(current_user)
-      redirect_to root_path, alert: "You're not a member of that household."
-    end
   end
 end

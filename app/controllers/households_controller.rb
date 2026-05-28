@@ -3,10 +3,12 @@ class HouseholdsController < ApplicationController
 
   def new
     @household = Household.new
+    authorize! @household
   end
 
   def create
     @household = Household.new(household_params)
+    authorize! @household
     if @household.save
       Membership.create!(user: current_user, household: @household, role: "admin")
       redirect_to @household, notice: "Household created. Invite code: #{@household.invite_code}"
@@ -17,18 +19,13 @@ class HouseholdsController < ApplicationController
 
   def show
     @household = Household.find(params[:id])
-
-    unless @household.members.include?(current_user)
-      redirect_to root_path, alert: "You don't have access to that household."
-      return
-    end
-
+    authorize! @household
     @memberships = @household.memberships.includes(:user)
     @recent_expenses = @household.expenses.recent.limit(10)
   end
 
   def join_form
-    # GET /households/join — renders the form
+    # GET /households/join — anyone signed in can see the form
   end
 
   def join

@@ -1,5 +1,13 @@
 class ApplicationController < ActionController::Base
+  include ActionPolicy::Controller
+
+  authorize :user, through: :current_user
+
   before_action :configure_permitted_parameters, if: :devise_controller?
+
+  rescue_from ActionPolicy::Unauthorized do |_ex|
+    redirect_to root_path, alert: "You don't have access to that."
+  end
 
   protected
 
