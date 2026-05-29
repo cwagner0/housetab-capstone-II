@@ -17,7 +17,7 @@ class Expense < ApplicationRecord
   validates :total_amount, presence: true, numericality: { greater_than: 0 }
   validates :date, presence: true
 
-  validate :splits_dont_exceed_total
+  
 
   # --- Scopes ---
   scope :recent, -> { order(date: :desc, created_at: :desc) }
@@ -42,13 +42,4 @@ class Expense < ApplicationRecord
   end
 
   private
-
-  def splits_dont_exceed_total
-    return unless total_amount.present? && splits.any?
-
-    splits_total = splits.sum(&:amount_owed)
-    if splits_total > total_amount
-      errors.add(:base, "Split amounts ($#{splits_total}) exceed the total ($#{total_amount})")
-    end
-  end
 end

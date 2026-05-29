@@ -40,8 +40,13 @@ class ExpensesController < ApplicationController
       end
 
       if @expense.receipt_photo.attached?
-        ReceiptScanJob.perform_later(@expense.id)
-        notice = "Expense added. AI is scanning the receipt..."
+        begin
+          ReceiptScanJob.perform_now(@expense.id)
+          notice = "Expense added. AI filled in the receipt details."
+        rescue => e
+          Rails.logger.error "Inline AI scan failed: #{e.class}: #{e.message}"
+          notice = "Expense added. AI scan failed, edit the expense to fix any details."
+        end
       else
         notice = "Expense added."
       end
