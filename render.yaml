@@ -1,22 +1,33 @@
 services:
   - type: web
-    name: my-app-name # the name of this service, you should change this
-    runtime: docker # use Dockerfile for deployment
-    plan: free # make sure to set this to free or you'll get billed $$$
+    name: housetab
+    runtime: docker
+    plan: free
     dockerfilePath: ./Dockerfile
-    envVars: # this section sets some ENV variables needed by Render for deployment
+    envVars:
       - key: SECRET_KEY_BASE
         generateValue: true
       - key: DATABASE_URL
+        fromDatabase:
+          name: housetab-db
+          property: connectionString
+      - key: OPENAI_API_KEY
         sync: false
-      # Memory optimization for Render free tier (512MB RAM)
       - key: WEB_CONCURRENCY
-        value: "1" # Single worker to fit in 512MB
+        value: "1"
       - key: RAILS_MAX_THREADS
-        value: "3" # Cap threads to reduce memory
+        value: "3"
       - key: MALLOC_ARENA_MAX
-        value: "2" # Reduce memory fragmentation
+        value: "2"
       - key: SOLID_QUEUE_IN_PUMA
-        value: "true" # Run background jobs in same process
+        value: "true"
       - key: BUNDLE_WITHOUT
-        value: "development:test" # Don't install dev/test gems in production
+        value: "development:test"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+
+databases:
+  - name: housetab-db
+    plan: free
+    databaseName: housetab
+    user: housetab
