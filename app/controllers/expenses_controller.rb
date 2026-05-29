@@ -16,6 +16,7 @@ class ExpensesController < ApplicationController
   def create
     @expense = @household.expenses.new(expense_params)
     @expense.payer = current_user
+    @expense.payer_included_in_split = (params.dig(:expense, :include_payer) == "1")
     authorize! @expense
 
     debtor_ids = Array(params[:expense][:debtor_ids]).reject(&:blank?).map(&:to_i)
@@ -27,7 +28,8 @@ class ExpensesController < ApplicationController
       return
     end
 
-    per_person = (@expense.total_amount.to_d / (debtor_ids.size + 1)).floor(2)
+    divisor = debtor_ids.size + (@expense.payer_included_in_split ? 1 : 0)
+    per_person = (@expense.total_amount.to_d / divisor).floor(2)
 
     begin
       Expense.transaction do
@@ -37,10 +39,9 @@ class ExpensesController < ApplicationController
         end
       end
 
-      # Kick off AI receipt scan if a photo was uploaded
       if @expense.receipt_photo.attached?
         ReceiptScanJob.perform_later(@expense.id)
-        notice = "Expense added. Scanning receipt with AI — refresh in a few seconds."
+        notice = "Expense added. AI is scanning the receipt..."
       else
         notice = "Expense added."
       end
@@ -55,6 +56,30 @@ class ExpensesController < ApplicationController
   def show
     @expense = @household.expenses.find(params[:id])
     authorize! @expense
+  end
+
+  def edit
+    @expense = @household.expenses.find(params[:id])
+    authorize! @expense, to: :update?
+  end
+
+  def update
+    @expense = @household.expenses.find(params[:id])
+    authorize! @expense, to: :update?
+
+    old_total = @expense.total_amount
+
+    if @expense.update(expense_params)
+      if @expense.total_amount != old_total && @expense.splits.any?
+        divisor = @expense.splits.count + (@expense.payer_included_in_split ? 1 : 0)
+        per_person = (@expense.total_amount.to_d / divisor).floor(2)
+        @expense.splits.update_all(amount_owed: per_person)
+      end
+
+      redirect_to [@household, @expense], notice: "Expense updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   private

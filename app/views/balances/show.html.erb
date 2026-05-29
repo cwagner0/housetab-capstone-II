@@ -1,3 +1,5 @@
+<%= turbo_stream_from @household %>
+
 <h1 class="mb-1">Balance with <%= @other_user.name %></h1>
 
 <div class="card mb-4">
@@ -70,7 +72,7 @@
       <% @settlements.each do |s| %>
         <li class="list-group-item d-flex justify-content-between">
           <div>
-            <%= s.sender.name %> &rarr; <%= s.recipient.name %>: $<%= s.amount %><br>
+            <%= s.sender.name %> → <%= s.recipient.name %>: $<%= s.amount %><br>
             <small class="text-muted"><%= s.created_at.strftime("%b %d, %Y") %></small>
           </div>
           <% status_color = s.confirmed? ? "success" : (s.disputed? ? "danger" : "warning") %>

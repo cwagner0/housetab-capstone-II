@@ -45,13 +45,23 @@
       </div>
 
       <fieldset class="mb-3">
-        <legend class="form-label">Split evenly with (you pay your own share):</legend>
+        <legend class="form-label">Who's in the split?</legend>
+
+        <div class="form-check mb-2">
+          <%= check_box_tag "expense[include_payer]", "1", true, class: "form-check-input", id: "include_payer" %>
+          <%= label_tag "include_payer", "Include myself (#{current_user.name})", class: "form-check-label fw-semibold" %>
+        </div>
+
         <% @members.each do |member| %>
           <div class="form-check">
             <%= check_box_tag "expense[debtor_ids][]", member.id, false, class: "form-check-input", id: "debtor_#{member.id}" %>
             <%= label_tag "debtor_#{member.id}", member.name, class: "form-check-label" %>
           </div>
         <% end %>
+
+        <small class="text-muted d-block mt-2">
+          Uncheck yourself if you paid for stuff that isn't yours (e.g., buying only a roommate's groceries).
+        </small>
       </fieldset>
 
       <%= f.submit "Save expense", class: "btn btn-primary" %>

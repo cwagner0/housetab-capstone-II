@@ -1,3 +1,7 @@
+<% if @current_household %>
+  <%= turbo_stream_from @current_household %>
+<% end %>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="mb-0">Hi, <%= current_user.name %></h1>
 </div>
@@ -63,7 +67,7 @@
                 <div class="d-flex justify-content-between">
                   <div>
                     <strong><%= e.description %></strong><br>
-                    <small class="text-muted"><%= e.date.strftime("%b %d") %> &middot; paid by <%= e.payer.name %></small>
+                    <small class="text-muted"><%= e.date.strftime("%b %d") %> · paid by <%= e.payer.name %></small>
                   </div>
                   <div class="fw-bold">$<%= e.total_amount %></div>
                 </div>

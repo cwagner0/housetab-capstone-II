@@ -1,3 +1,5 @@
+<%= turbo_stream_from @household %>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="mb-0">Settlements in <%= @household.name %></h1>
   <%= link_to "Log a settlement", new_household_settlement_path(@household), class: "btn btn-primary" %>

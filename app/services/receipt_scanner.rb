@@ -7,14 +7,13 @@ class ReceiptScanner
   MODEL = "gpt-4o-mini".freeze
 
   PROMPT = <<~PROMPT.freeze
-    You are reading a retail receipt image. Extract these fields:
-    - store_name: the name of the store
-    - total_amount: the total in dollars as a number, no $ sign
-    - date: the date on the receipt in YYYY-MM-DD format; if year is missing, assume #{Date.current.year}
-    - description: a 3-7 word summary of what was purchased
+    You are reading a retail receipt image. Extract these fields and return JSON.
+    - store_name: the name of the store (string)
+    - total_amount: the FINAL total in dollars as a plain number, no $ sign, no commas (number)
+    - date: the date on the receipt in YYYY-MM-DD format; if year is missing, assume #{Date.current.year} (string)
+    - description: a 3-7 word summary of what was purchased (string)
 
-    Reply with ONLY valid JSON, no other text, in this exact format:
-    {"store_name": "...", "total_amount": 0.00, "date": "YYYY-MM-DD", "description": "..."}
+    Return ONLY valid JSON with these exact keys: store_name, total_amount, date, description.
   PROMPT
 
   def self.call(blob)
@@ -28,6 +27,7 @@ class ReceiptScanner
   def call
     response = HTTP.auth("Bearer #{api_key}")
                    .headers(content_type: "application/json")
+                   .timeout(60)
                    .post(ENDPOINT, json: payload)
 
     unless response.status.success?
@@ -35,8 +35,6 @@ class ReceiptScanner
     end
 
     content = response.parse.dig("choices", 0, "message", "content").to_s
-
-    # Strip markdown code block wrapping if the model returned one
     content = content.sub(/\A```(?:json)?\s*/i, "").sub(/\s*```\z/, "").strip
 
     Rails.logger.info "ReceiptScanner raw response: #{content}"
@@ -49,6 +47,7 @@ class ReceiptScanner
   def payload
     {
       model: MODEL,
+      response_format: { type: "json_object" },
       messages: [
         {
           role: "user",
@@ -58,7 +57,7 @@ class ReceiptScanner
           ]
         }
       ],
-      max_tokens: 300
+      max_tokens: 400
     }
   end
 

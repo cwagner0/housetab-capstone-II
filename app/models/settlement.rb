@@ -1,36 +1,11 @@
-# == Schema Information
-#
-# Table name: settlements
-#
-#  id           :bigint           not null, primary key
-#  amount       :decimal(10, 2)   not null
-#  confirmed_at :datetime
-#  note         :string
-#  status       :string           default("pending"), not null
-#  created_at   :datetime         not null
-#  updated_at   :datetime         not null
-#  from_user_id :bigint           not null
-#  household_id :bigint           not null
-#  to_user_id   :bigint           not null
-#
-# Indexes
-#
-#  index_settlements_on_from_user_id             (from_user_id)
-#  index_settlements_on_household_id             (household_id)
-#  index_settlements_on_household_id_and_status  (household_id,status)
-#  index_settlements_on_to_user_id               (to_user_id)
-#
-# Foreign Keys
-#
-#  fk_rails_...  (from_user_id => users.id)
-#  fk_rails_...  (household_id => households.id)
-#  fk_rails_...  (to_user_id => users.id)
-#
 class Settlement < ApplicationRecord
   # --- Associations ---
   belongs_to :household
   belongs_to :sender, class_name: "User", foreign_key: "from_user_id"
   belongs_to :recipient, class_name: "User", foreign_key: "to_user_id"
+
+  # --- Live updates ---
+  after_commit -> { household.broadcast_refresh_later }, on: [:create, :update, :destroy]
 
   # --- Validations ---
   validates :amount, presence: true, numericality: { greater_than: 0 }

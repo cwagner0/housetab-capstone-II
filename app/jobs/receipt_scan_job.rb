@@ -7,7 +7,8 @@ class ReceiptScanJob < ApplicationJob
 
     data = ReceiptScanner.call(expense.receipt_photo.blob)
 
-    # Update expense with extracted data (fall back to existing values if AI returns blanks)
+    Rails.logger.info "ReceiptScanJob parsed data for expense #{expense_id}: #{data.inspect}"
+
     expense.update!(
       store_name: data["store_name"].presence || expense.store_name,
       description: data["description"].presence || expense.description,
@@ -15,16 +16,16 @@ class ReceiptScanJob < ApplicationJob
       date: parsed_date(data["date"]) || expense.date
     )
 
-    # If total changed, recalculate splits evenly
     if data["total_amount"].present? && expense.splits.any?
-      n = expense.splits.count + 1  # +1 for the payer
-      per_person = (expense.total_amount.to_d / n).floor(2)
+      divisor = expense.splits.count + (expense.payer_included_in_split ? 1 : 0)
+      per_person = (expense.total_amount.to_d / divisor).floor(2)
       expense.splits.update_all(amount_owed: per_person)
     end
 
     Rails.logger.info "ReceiptScanJob completed for expense #{expense_id}"
   rescue => e
-    Rails.logger.error "ReceiptScanJob failed for expense #{expense_id}: #{e.class}: #{e.message}"
+    Rails.logger.error "ReceiptScanJob FAILED for expense #{expense_id}: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace.first(10).join("\n")
     raise
   end
 

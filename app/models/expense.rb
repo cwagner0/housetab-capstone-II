@@ -1,30 +1,3 @@
-# == Schema Information
-#
-# Table name: expenses
-#
-#  id                      :bigint           not null, primary key
-#  date                    :date             not null
-#  description             :string           not null
-#  notes                   :text
-#  payer_included_in_split :boolean          default(TRUE), not null
-#  store_name              :string
-#  total_amount            :decimal(10, 2)   not null
-#  created_at              :datetime         not null
-#  updated_at              :datetime         not null
-#  household_id            :bigint           not null
-#  paid_by_user_id         :bigint           not null
-#
-# Indexes
-#
-#  index_expenses_on_household_id           (household_id)
-#  index_expenses_on_household_id_and_date  (household_id,date)
-#  index_expenses_on_paid_by_user_id        (paid_by_user_id)
-#
-# Foreign Keys
-#
-#  fk_rails_...  (household_id => households.id)
-#  fk_rails_...  (paid_by_user_id => users.id)
-#
 class Expense < ApplicationRecord
   # --- Associations ---
   belongs_to :household
@@ -34,6 +7,10 @@ class Expense < ApplicationRecord
 
   # Receipt photo (ActiveStorage)
   has_one_attached :receipt_photo
+
+  # --- Live updates ---
+  broadcasts_refreshes
+  after_commit -> { household.broadcast_refresh_later }, on: [:create, :update, :destroy]
 
   # --- Validations ---
   validates :description, presence: true

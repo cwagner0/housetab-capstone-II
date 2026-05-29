@@ -1,14 +1,10 @@
+<%= turbo_stream_from @expense %>
+
 <h1 class="mb-1"><%= @expense.description %></h1>
 <p class="text-muted mb-4">
   <%= @expense.date.strftime("%B %d, %Y") %>
-  <% if @expense.store_name.present? %> &middot; <%= @expense.store_name %><% end %>
+  <% if @expense.store_name.present? %> · <%= @expense.store_name %><% end %>
 </p>
-
-<% if @expense.receipt_photo.attached? %>
-  <p class="mb-4">
-    <a href="<%= request.path %>" class="btn btn-sm btn-outline-secondary">↻ Refresh to see latest AI scan</a>
-  </p>
-<% end %>
 
 <div class="row g-4">
   <div class="col-md-6">
@@ -26,12 +22,12 @@
       <div class="card-header"><strong>Who owes what</strong></div>
       <% unless @expense.payer_included_in_split %>
         <div class="card-body py-2">
-         <small class="text-muted">
+          <small class="text-muted">
             <%= @expense.payer.name %> paid this for the group and isn't taking a share.
-         </small>
-       </div>
+          </small>
+        </div>
       <% end %>
-     <ul class="list-group list-group-flush">
+      <ul class="list-group list-group-flush">
         <% @expense.splits.includes(:user).each do |split| %>
           <li class="list-group-item d-flex justify-content-between">
             <%= split.user.name %>
