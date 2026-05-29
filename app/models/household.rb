@@ -1,3 +1,17 @@
+# == Schema Information
+#
+# Table name: households
+#
+#  id          :bigint           not null, primary key
+#  invite_code :string           not null
+#  name        :string           not null
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#
+# Indexes
+#
+#  index_households_on_invite_code  (invite_code) UNIQUE
+#
 class Household < ApplicationRecord
   # --- Associations ---
   has_many :memberships, dependent: :destroy

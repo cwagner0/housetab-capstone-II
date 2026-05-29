@@ -4,6 +4,12 @@
   <% if @expense.store_name.present? %> &middot; <%= @expense.store_name %><% end %>
 </p>
 
+<% if @expense.receipt_photo.attached? %>
+  <p class="mb-4">
+    <a href="<%= request.path %>" class="btn btn-sm btn-outline-secondary">↻ Refresh to see latest AI scan</a>
+  </p>
+<% end %>
+
 <div class="row g-4">
   <div class="col-md-6">
     <div class="card">
@@ -18,7 +24,14 @@
 
     <div class="card mt-3">
       <div class="card-header"><strong>Who owes what</strong></div>
-      <ul class="list-group list-group-flush">
+      <% unless @expense.payer_included_in_split %>
+        <div class="card-body py-2">
+         <small class="text-muted">
+            <%= @expense.payer.name %> paid this for the group and isn't taking a share.
+         </small>
+       </div>
+      <% end %>
+     <ul class="list-group list-group-flush">
         <% @expense.splits.includes(:user).each do |split| %>
           <li class="list-group-item d-flex justify-content-between">
             <%= split.user.name %>
@@ -42,6 +55,9 @@
 </div>
 
 <div class="mt-4">
+  <% if @expense.payer == current_user %>
+    <%= link_to "Edit", edit_household_expense_path(@expense.household, @expense), class: "btn btn-outline-primary" %>
+  <% end %>
   <%= link_to "All expenses", household_expenses_path(@expense.household), class: "btn btn-outline-secondary" %>
   <%= link_to "Back to household", @expense.household, class: "btn btn-link" %>
 </div>

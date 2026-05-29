@@ -36,7 +36,16 @@ class ExpensesController < ApplicationController
           @expense.splits.create!(user_id: uid, amount_owed: per_person)
         end
       end
-      redirect_to [@household, @expense], notice: "Expense added."
+
+      # Kick off AI receipt scan if a photo was uploaded
+      if @expense.receipt_photo.attached?
+        ReceiptScanJob.perform_later(@expense.id)
+        notice = "Expense added. Scanning receipt with AI — refresh in a few seconds."
+      else
+        notice = "Expense added."
+      end
+
+      redirect_to [@household, @expense], notice: notice
     rescue ActiveRecord::RecordInvalid
       @members = @household.members.where.not(id: current_user.id)
       render :new, status: :unprocessable_entity

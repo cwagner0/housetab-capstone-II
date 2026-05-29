@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   post "/households/join", to: "households#join"
 
   resources :households, only: [:new, :create, :show] do
-    resources :expenses, only: [:index, :new, :create, :show]
+    resources :expenses, only: [:index, :new, :create, :show, :edit, :update]
     resources :settlements, only: [:index, :new, :create]
     resources :balances, only: [:show], param: :user_id
   end

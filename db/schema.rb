@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_28_201640) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_29_161453) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_201640) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "payer_included_in_split", default: true, null: false
     t.index ["household_id", "date"], name: "index_expenses_on_household_id_and_date"
     t.index ["household_id"], name: "index_expenses_on_household_id"
     t.index ["paid_by_user_id"], name: "index_expenses_on_paid_by_user_id"
