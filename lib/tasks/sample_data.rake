@@ -26,68 +26,69 @@ task({ sample_data: :environment }) do
   Membership.create!(user: tom,     household: apt, role: "member")
 
   puts "Creating expenses..."
+  today = Date.current
 
-  # Expense 1: Charlie paid, split with Jimmy and Olivia
+  # 1: Charlie paid groceries 2 days ago, split with Jimmy and Olivia
   e1 = Expense.create!(
     household: apt, payer: charlie,
     description: "Trader Joe's groceries",
     total_amount: 67.42, store_name: "Trader Joe's",
-    date: Date.new(2026, 2, 28), notes: "Weekly groceries run"
+    date: today - 2.days, notes: "Weekly groceries run"
   )
   Split.create!(expense: e1, user: jimmy,  amount_owed: 22.47)
   Split.create!(expense: e1, user: olivia, amount_owed: 22.47)
 
-  # Expense 2: Jimmy paid, split 4 ways
+  # 2: Jimmy paid Thai takeout 3 days ago, split 4 ways
   e2 = Expense.create!(
     household: apt, payer: jimmy,
     description: "Thai takeout dinner",
     total_amount: 48.90, store_name: "Pad Thai Palace",
-    date: Date.new(2026, 2, 27)
+    date: today - 3.days
   )
   per_person = (48.90 / 4).round(2)
   Split.create!(expense: e2, user: charlie, amount_owed: per_person)
   Split.create!(expense: e2, user: olivia,  amount_owed: per_person)
   Split.create!(expense: e2, user: tom,     amount_owed: 48.90 - (per_person * 3))
 
-  # Expense 3: Olivia paid, split 4 ways
+  # 3: Olivia paid Target run 4 days ago, split 4 ways
   e3 = Expense.create!(
     household: apt, payer: olivia,
     description: "Paper towels & cleaning supplies",
     total_amount: 22.15, store_name: "Target",
-    date: Date.new(2026, 2, 26)
+    date: today - 4.days
   )
   per_person = (22.15 / 4).round(2)
   Split.create!(expense: e3, user: charlie, amount_owed: per_person)
   Split.create!(expense: e3, user: jimmy,   amount_owed: per_person)
   Split.create!(expense: e3, user: tom,     amount_owed: 22.15 - (per_person * 3))
 
-  # Expense 4: Tom paid, split with Charlie only
+  # 4: Tom paid Costco 6 days ago, split with Charlie only
   e4 = Expense.create!(
     household: apt, payer: tom,
-    description: "Costco run — bulk items",
+    description: "Costco run, bulk items",
     total_amount: 134.88, store_name: "Costco",
-    date: Date.new(2026, 2, 24)
+    date: today - 6.days
   )
   Split.create!(expense: e4, user: charlie, amount_owed: 67.44)
 
-  # Expense 5: Charlie paid, split 4 ways
+  # 5: Charlie paid pizza 8 days ago, split 4 ways
   e5 = Expense.create!(
     household: apt, payer: charlie,
     description: "Domino's pizza night",
     total_amount: 38.50, store_name: "Domino's",
-    date: Date.new(2026, 2, 22)
+    date: today - 8.days
   )
   per_person = (38.50 / 4).round(2)
   Split.create!(expense: e5, user: jimmy,  amount_owed: per_person)
   Split.create!(expense: e5, user: olivia, amount_owed: per_person)
   Split.create!(expense: e5, user: tom,    amount_owed: 38.50 - (per_person * 3))
 
-  # Expense 6: Olivia paid, split 4 ways
+  # 6: Olivia paid Amazon 10 days ago, split 4 ways
   e6 = Expense.create!(
     household: apt, payer: olivia,
-    description: "Amazon — shower curtain",
+    description: "Amazon shower curtain",
     total_amount: 19.99, store_name: "Amazon",
-    date: Date.new(2026, 2, 20)
+    date: today - 10.days
   )
   per_person = (19.99 / 4).round(2)
   Split.create!(expense: e6, user: charlie, amount_owed: per_person)
@@ -96,11 +97,11 @@ task({ sample_data: :environment }) do
 
   puts "Creating settlements..."
 
-  # Jimmy already settled $20 with Charlie (confirmed)
+  # Jimmy already settled $20 with Charlie (confirmed 5 days ago)
   Settlement.create!(
     household: apt, sender: jimmy, recipient: charlie,
     amount: 20.00, note: "Caught up",
-    status: "confirmed", confirmed_at: Time.new(2026, 2, 25)
+    status: "confirmed", confirmed_at: today - 5.days
   )
 
   # Jimmy sent another $45 (pending Charlie's confirmation)
