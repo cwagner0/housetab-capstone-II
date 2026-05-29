@@ -548,6 +548,7 @@ DEPENDENCIES
   rufo
   selenium-webdriver (~> 4.41)
   shoulda-matchers (~> 7.0)
+  simple_form
   solid_cable
   solid_cache
   solid_queue

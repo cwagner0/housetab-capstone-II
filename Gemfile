@@ -2,6 +2,7 @@ source "https://rubygems.org"
 
 gem "rails", "~> 8.0.2"               # The web framework
 gem "devise"
+gem "simple_form"
 gem "action_policy"
 gem "propshaft"                       # Asset pipeline (CSS, JS, images)
 gem "pg", "~> 1.1"                    # PostgreSQL database adapter
