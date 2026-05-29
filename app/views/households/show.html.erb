@@ -40,7 +40,7 @@
                   <%= link_to e.description, [@household, e], class: "text-decoration-none fw-semibold" %><br>
                   <small class="text-muted"><%= e.date.strftime("%b %d") %> · <%= e.payer.name %></small>
                 </div>
-                <div class="fw-bold">$<%= e.total_amount %></div>
+                <div class="fw-bold"><%= number_to_currency(e.total_amount) %></div>
               </div>
             </li>
           <% end %>

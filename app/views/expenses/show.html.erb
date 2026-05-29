@@ -6,12 +6,24 @@
   <% if @expense.store_name.present? %> · <%= @expense.store_name %><% end %>
 </p>
 
+<% if @expense.receipt_photo.attached? %>
+  <div class="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <strong>🤖 AI auto-filled this expense from your receipt.</strong><br>
+      <small>Verify the details below. If anything's wrong, click Edit to correct it manually.</small>
+    </div>
+    <% if @expense.payer == current_user %>
+      <%= link_to "Edit details", edit_household_expense_path(@expense.household, @expense), class: "btn btn-warning ms-3" %>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="row g-4">
   <div class="col-md-6">
     <div class="card">
       <div class="card-body">
         <p class="mb-2"><strong>Paid by:</strong> <%= @expense.payer.name %></p>
-        <p class="mb-2"><strong>Total:</strong> $<%= @expense.total_amount %></p>
+        <p class="mb-2"><strong>Total:</strong> <%= number_to_currency(@expense.total_amount) %></p>
         <% if @expense.notes.present? %>
           <p class="mb-0"><strong>Notes:</strong> <%= @expense.notes %></p>
         <% end %>
@@ -31,7 +43,7 @@
         <% @expense.splits.includes(:user).each do |split| %>
           <li class="list-group-item d-flex justify-content-between">
             <%= split.user.name %>
-            <span class="fw-bold">$<%= split.amount_owed %></span>
+            <span class="fw-bold"><%= number_to_currency(split.amount_owed) %></span>
           </li>
         <% end %>
       </ul>

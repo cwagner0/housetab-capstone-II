@@ -11,9 +11,9 @@
           <div class="d-flex justify-content-between">
             <div>
               <%= link_to expense.description, [@household, expense], class: "fw-semibold text-decoration-none" %><br>
-              <small class="text-muted"><%= expense.date.strftime("%b %d") %> &middot; paid by <%= expense.payer.name %></small>
+              <small class="text-muted"><%= expense.date.strftime("%b %d") %> · paid by <%= expense.payer.name %></small>
             </div>
-            <div class="fw-bold">$<%= expense.total_amount %></div>
+            <div class="fw-bold"><%= number_to_currency(expense.total_amount) %></div>
           </div>
         </li>
       <% end %>

@@ -39,14 +39,24 @@
         <% if @balances.any? %>
           <ul class="list-group list-group-flush">
             <% @balances.each do |b| %>
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <%= link_to b[:user].name, household_balance_path(@current_household, user_id: b[:user].id), class: "text-decoration-none" %>
-                <% if b[:amount] > 0 %>
-                  <span class="badge bg-success">+ $<%= b[:amount].round(2) %></span>
-                <% elsif b[:amount] < 0 %>
-                  <span class="badge bg-danger">- $<%= b[:amount].abs.round(2) %></span>
-                <% else %>
-                  <span class="badge bg-secondary">settled</span>
+              <li class="list-group-item">
+                <%= link_to household_balance_path(@current_household, user_id: b[:user].id), class: "text-decoration-none text-dark d-block" do %>
+                  <% if b[:amount] > 0 %>
+                    <div class="d-flex justify-content-between">
+                      <span><strong><%= b[:user].name %></strong> owes you</span>
+                      <span class="fw-bold text-success"><%= number_to_currency(b[:amount]) %></span>
+                    </div>
+                  <% elsif b[:amount] < 0 %>
+                    <div class="d-flex justify-content-between">
+                      <span>You owe <strong><%= b[:user].name %></strong></span>
+                      <span class="fw-bold text-danger"><%= number_to_currency(b[:amount].abs) %></span>
+                    </div>
+                  <% else %>
+                    <div class="d-flex justify-content-between">
+                      <span><strong><%= b[:user].name %></strong></span>
+                      <span class="text-muted">settled up</span>
+                    </div>
+                  <% end %>
                 <% end %>
               </li>
             <% end %>
@@ -69,7 +79,7 @@
                     <strong><%= e.description %></strong><br>
                     <small class="text-muted"><%= e.date.strftime("%b %d") %> · paid by <%= e.payer.name %></small>
                   </div>
-                  <div class="fw-bold">$<%= e.total_amount %></div>
+                  <div class="fw-bold"><%= number_to_currency(e.total_amount) %></div>
                 </div>
               </li>
             <% end %>

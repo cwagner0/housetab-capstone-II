@@ -40,8 +40,9 @@
       </div>
 
       <div class="mb-3">
-        <%= f.label :receipt_photo, "Receipt photo (optional)", class: "form-label" %>
+        <%= f.label :receipt_photo, "Receipt photo (optional, AI will read it)", class: "form-label" %>
         <%= f.file_field :receipt_photo, accept: "image/*", class: "form-control" %>
+        <small class="text-muted">If you upload a receipt, AI will read the store name, total, and date automatically.</small>
       </div>
 
       <div class="mb-3">
@@ -79,7 +80,8 @@
         Pick at least one person to split with.
       </div>
 
-      <%= f.submit "Save expense", class: "btn btn-primary" %>
+      <%= f.submit "Save expense", class: "btn btn-primary",
+                    data: { turbo_submits_with: "Scanning receipt with AI, give me a few seconds..." } %>
       <%= link_to "Cancel", @household, class: "btn btn-link" %>
     <% end %>
   </div>

@@ -6,13 +6,11 @@
   <div class="card-body">
     <p class="h4 mb-3">
       <% if @net_balance > 0 %>
-        <span class="badge bg-success">+ $<%= @net_balance.round(2) %></span>
-        <%= @other_user.name %> owes you
+        <span class="text-success"><strong><%= @other_user.name %> owes you <%= number_to_currency(@net_balance) %></strong></span>
       <% elsif @net_balance < 0 %>
-        <span class="badge bg-danger">- $<%= @net_balance.abs.round(2) %></span>
-        You owe <%= @other_user.name %>
+        <span class="text-danger"><strong>You owe <%= @other_user.name %> <%= number_to_currency(@net_balance.abs) %></strong></span>
       <% else %>
-        <span class="badge bg-secondary">settled up</span>
+        <span class="text-muted"><strong>Settled up</strong></span>
       <% end %>
     </p>
     <%= link_to "Settle up", new_household_settlement_path(@household, to_user_id: @other_user.id), class: "btn btn-primary" %>
@@ -32,7 +30,7 @@
                 <%= link_to e.description, [@household, e], class: "text-decoration-none" %><br>
                 <small class="text-muted"><%= e.date.strftime("%b %d") %></small>
               </div>
-              <span class="fw-bold text-success">+$<%= split&.amount_owed %></span>
+              <span class="fw-bold text-success">+<%= number_to_currency(split&.amount_owed) %></span>
             </li>
           <% end %>
         </ul>
@@ -54,7 +52,7 @@
                 <%= link_to e.description, [@household, e], class: "text-decoration-none" %><br>
                 <small class="text-muted"><%= e.date.strftime("%b %d") %></small>
               </div>
-              <span class="fw-bold text-danger">-$<%= split&.amount_owed %></span>
+              <span class="fw-bold text-danger">-<%= number_to_currency(split&.amount_owed) %></span>
             </li>
           <% end %>
         </ul>
@@ -72,7 +70,7 @@
       <% @settlements.each do |s| %>
         <li class="list-group-item d-flex justify-content-between">
           <div>
-            <%= s.sender.name %> → <%= s.recipient.name %>: $<%= s.amount %><br>
+            <%= s.sender.name %> → <%= s.recipient.name %>: <%= number_to_currency(s.amount) %><br>
             <small class="text-muted"><%= s.created_at.strftime("%b %d, %Y") %></small>
           </div>
           <% status_color = s.confirmed? ? "success" : (s.disputed? ? "danger" : "warning") %>
